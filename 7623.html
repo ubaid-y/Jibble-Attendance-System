@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jibble Attendance System</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right,#4dffff, #f2f2f2);
+            color: #333;
+        }
+
+        /* Splash Screen Styles */
+        .splash-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #660066, #4e4376);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            animation: fadeOut 3s ease-out 5s forwards;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            color: #FFFFFF;
+            text-transform: uppercase;
+            font-weight: bold;
+            opacity: 0;
+            animation: logoAnimation 3s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            100% {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        @keyframes logoAnimation {
+            0% {
+                opacity: 0;
+                transform: scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Main content styles */
+        .hidden {
+            display: none;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        h1, h2 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 200px;
+            height: 50px;
+            font-size: 18px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            margin: 10px auto;
+        }
+
+        .login-btn, .signup-btn {
+            background-color: #4CAF50;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        table th {
+            background-color: #e8f0fe;
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div class="splash-container">
+        <div class="logo">JIBBLE Attendance</div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login-page" class="container hidden">
+        <h1>Login</h1>
+        <form id="login-form">
+            <input type="email" id="login-email" placeholder="Email" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button type="submit" class="btn login-btn">Log In</button>
+        </form>
+        <p class="switch">Don't have an account? <a href="#" onclick="showSignup()">Signup</a></p>
+    </div>
+
+    <!-- Signup Page -->
+    <div id="signup-page" class="container hidden">
+        <h1>Signup</h1>
+        <form id="signup-form">
+            <input type="text" name="firstname" placeholder="First Name" required>
+            <input type="text" name="lastname" placeholder="Last Name" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="password" name="confirm-password" placeholder="Confirm Password" required>
+            <button type="submit" class="btn signup-btn">Sign Up</button>
+        </form>
+        <button onclick="showLogin()" class="btn">Back</button>
+    </div>
+
+    <!-- Main Attendance System -->
+    <div id="attendance-system" class="hidden">
+        <div class="container">
+            <h1>Jibble Attendance System</h1>
+            <h2>Enter Classes</h2>
+            <form id="class-form">
+                <input type="text" id="class-name" placeholder="Enter Class Name" required>
+                <button type="submit" class="btn login-btn">Add Class</button>
+            </form>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Class Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="class-list"></tbody>
+            </table>
+        </div>
+
+        <div class="container hidden" id="attendance-container">
+            <h2 id="attendance-class-name"></h2>
+            <p>Select a biometric option to mark attendance:</p>
+            <button class="btn" onclick="triggerFingerprint()">Scan Fingerprint</button>
+            <button class="btn" onclick="triggerFaceRecognition()">Recognize Face</button>
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="attendance-list"></tbody>
+            </table>
+            <button class="btn" onclick="goBack()">Back to Classes</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = () => {
+            setTimeout(() => {
+                document.querySelector('.splash-container').style.display = 'none';
+                document.getElementById('login-page').classList.remove('hidden');
+            }, 8000);
+        };
+
+        function showSignup() {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('signup-page').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('signup-page').classList.add('hidden');
+            document.getElementById('login-page').classList.remove('hidden');
+        }
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('attendance-system').classList.remove('hidden');
+        });
+
+        document.getElementById('signup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Signup successful! Please log in.');
+            showLogin();
+        });
+
+        document.getElementById('class-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const className = document.getElementById('class-name').value;
+            const row = `<tr><td>${className}</td><td><button class="btn" onclick="openAttendance('${className}')">Mark Attendance</button></td></tr>`;
+            document.getElementById('class-list').innerHTML += row;
+        });
+
+        function openAttendance(className) {
+            document.getElementById('attendance-class-name').textContent = `Mark Attendance for ${className}`;
+            document.getElementById('attendance-container').classList.remove('hidden');
+        }
+
+        function goBack() {
+            document.getElementById('attendance-container').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
